@@ -126,7 +126,7 @@
                 </table>
                 <div>
                     <button class="btn btn-warning" ng-click="checkcr()">Check CR</button>
-                    <button class="btn btn-primary pull-right" ng-click="simpan()">Simpan</button>
+                    <button ng-if="btnSimpan" class="btn btn-primary pull-right" ng-click="simpan()">Simpan</button>
                 </div>
 
             </div>

@@ -23,6 +23,18 @@ class Periode extends CI_Controller
         $this->load->view('layouts/main', $data);
     }
 
+    function getperiodeaktif(Type $var = null)
+    {
+        $data = $this->Periode_model->get_periodeaktif();
+        echo json_encode($data);
+    }
+
+    function getdata()
+    {
+        $data = $this->Periode_model->get_all_periode();
+        echo json_encode($data);
+    }
+
     /*
      * Adding a new periode
      */

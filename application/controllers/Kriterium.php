@@ -21,7 +21,7 @@ class Kriterium extends CI_Controller
     public function index()
     {
         $data['kriteria'] = $this->Kriterium_model->get_all_kriteria();
-        $data['data'] = ['title' => 'Bobot Kriteria', 'header' => 'Pembobotan'];
+        $data['data'] = ['title' => 'Kriteria', 'header' => 'kriteria'];
         $data['_view'] = 'kriterium/index';
         $this->load->view('layouts/main', $data);
     }
@@ -33,6 +33,20 @@ class Kriterium extends CI_Controller
     {
         $params = json_decode($this->security->xss_clean($this->input->raw_input_stream), true);
         $result = $this->Kriterium_model->add_kriterium($params);
+        echo json_encode(['message' => $result]);
+    }
+
+    function addkriteria()
+    {
+        $params = json_decode($this->security->xss_clean($this->input->raw_input_stream), true);
+        $result = $this->Kriterium_model->addkriteria($params);
+        echo json_encode($result);
+    }
+
+    function editkriteria()
+    {
+        $params = json_decode($this->security->xss_clean($this->input->raw_input_stream), true);
+        $result = $this->Kriterium_model->updatekriteria($params);
         echo json_encode(['message' => $result]);
     }
 
@@ -72,9 +86,9 @@ class Kriterium extends CI_Controller
         // check if the kriterium exists before trying to delete it
         if (isset($kriterium['idkriteria'])) {
             $this->Kriterium_model->delete_kriterium($idkriteria);
-            redirect('kriterium/index');
+            echo json_encode(['message'=>true]);
         } else {
-            show_error('The kriterium you are trying to delete does not exist.');
+            echo json_encode(['message'=>false]);
         }
 
     }

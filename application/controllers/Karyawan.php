@@ -38,7 +38,7 @@ class Karyawan extends CI_Controller{
         }
         else
         {            
-            $data['data'] = ['title'=>'Add Karyawan', 'header'=>'Add Karyawan'];
+            $data['data'] = ['title'=>'Tambah Karyawan', 'header'=>'Tambah Karyawan'];
             $data['_view'] = 'karyawan/add';
             $this->load->view('layouts/main',$data);
         }
@@ -51,6 +51,7 @@ class Karyawan extends CI_Controller{
     {   
         // check if the karyawan exists before trying to edit it
         $data['karyawan'] = $this->Karyawan_model->get_karyawan($idkaryawan);
+        $data['data'] = ['title'=>'Ubah Karyawan', 'header'=>'Ubah Karyawan'];
         
         if(isset($data['karyawan']['idkaryawan']))
         {
