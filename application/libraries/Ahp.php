@@ -8,15 +8,20 @@ class Ahp
     public const QUALITATIVE = 0;
     public $criterias = [];
     public $rawCriteria = [];
+    public $rawSubCriteria = [];
     public $relativeMatrix = [];
     public $eigenVector = [];
     public $candidates = [];
     public $criteriaPairWise = [];
+    public $subCriteriaPairWise = [];
+    public $subCriteria = [];
     public $finalMatrix = [];
     public $finalRanks = [];
     public $concistencybobot = [];
+    public $Subconcistencybobot = [];
     public $bobomatrix = [];
     public $alternativeMatrix = [];
+    public $dataSub = [];
     public $CR;
     public static $ir = [
         0.00,
@@ -148,7 +153,7 @@ class Ahp
     {
         foreach ($kriteria as $key => $value) {
             $b = 0;
-            $items[$value['kriteria']]=[];
+            $items[$value['kriteria']] = [];
             for ($i = 0; $i < count($this->candidates); $i++) {
                 $item = [];
                 for ($j = 0; $j < count($this->candidates); $j++) {
@@ -164,10 +169,37 @@ class Ahp
                 array_push($items[$value['kriteria']], $item);
             }
         }
-        
+
         return $items;
     }
 
+    public function setSubkriteria($kriteria)
+    {
+        $this->dataSub = $kriteria;
+        foreach ($kriteria as $key => $value) {
+            $b = 0;
+            $items[$value['kriteria']] = [];
+            $this->subCriteria[$key]['subkriteria'] = [];
+
+            for ($i = 0; $i < count($value['subkriteria']); $i++) {
+                $item = [];
+                for ($j = 0; $j < count($value['subkriteria']); $j++) {
+                    if ($i == $j) {
+                        array_push($item, 1);
+                    } else if ($i < $j) {
+                        array_push($item, $value['item'][$b]['nilai']);
+                        $b += 1;
+                    } else {
+                        array_push($item, null);
+                    }
+                }
+                array_push($items[$value['kriteria']], $item);
+                array_push($this->subCriteria[$key]['subkriteria'], $item);
+            }
+        }
+
+        return $items;
+    }
 
     public function setCriteriaPairWise($criteria_name, array $matrix)
     {
@@ -175,8 +207,12 @@ class Ahp
         if (!is_numeric($id)) {
             throw new \ErrorException('Criteria \'' . $criteria_name . '\' not found');
         }
+        if (count($this->candidates) !== 0) {
+            return $this->criterias[$id]['type'] == self::QUALITATIVE ? $this->setCriteriaPairWiseQualitative($criteria_name, $matrix) : $this->setCriteriaPairWiseQuantitative($criteria_name, $matrix);
+        } else {
+            return $this->criterias[$id]['type'] == self::QUALITATIVE ? $this->setSubCriteriaPairWiseQualitative($criteria_name, $matrix) : $this->setsubCriteriaPairWiseQuantitative($criteria_name, $matrix);
+        }
 
-        return $this->criterias[$id]['type'] == self::QUALITATIVE ? $this->setCriteriaPairWiseQualitative($criteria_name, $matrix) : $this->setCriteriaPairWiseQuantitative($criteria_name, $matrix);
     }
 
     public function setBatchCriteriaPairWise(array $matrix)
@@ -280,6 +316,22 @@ class Ahp
         return $this;
     }
 
+    public function setsubCriteriaPairWiseQuantitative($criteria_name, array $matrix)
+    {
+        $tot = array_sum($matrix);
+        $matrix_eigen = [];
+        foreach ($matrix as $key => $value) {
+            if (is_array($value)) {
+                throw new \ErrorException('Quantitative Pairwise should have matrix sized ' . $size . "x1");
+            }
+
+            $matrix_eigen[] = $value / $tot;
+        }
+        $this->criteriaPairWise[$criteria_name]['eigen'] = $matrix_eigen;
+        $this->criteriaPairWise[$criteria_name]['matrix'] = $matrix;
+        return $this;
+    }
+
     public function setCriteriaPairWiseQualitative($criteria_name, $matrix)
     {
 
@@ -312,8 +364,69 @@ class Ahp
         // $criteria_name;
         $this->rawCriteria[$criteria_name] = $matrix;
         $this->criteriaPairWise[$criteria_name] = $this->normalizeRelativeInterestMatrixAndCountEigen($matrix);
-        $this->criteriaPairWise[$criteria_name]['cr'] = $this->concistencyCheck($matrix,$this->criteriaPairWise[$criteria_name]['eigen']);
+        $this->criteriaPairWise[$criteria_name]['cr'] = $this->concistencyCheck($matrix, $this->criteriaPairWise[$criteria_name]['eigen']);
         return $this;
+    }
+
+    public function setSubCriteriaPairWiseQualitative($criteria_name, $matrix)
+    {
+
+        // $size = count($this->candidates);
+        // if ($size != count($matrix)) {
+        //     throw new \ErrorException('matrix size should be ' . $size . "x" . $size);
+        // }
+
+        foreach ($matrix as $i => $m) {
+            // if ($size != count($m)) {
+            //     throw new \ErrorException('matrix size should be ' . $size . "x" . $size);
+            // }
+
+            for ($j = 0; $j < count($m); $j++) {
+                if ($i == $j) {
+                    if ($matrix[$i][$j] != 1) {
+                        throw new \ErrorException('matrix diagonal should have value : 1');
+                    }
+                } else {
+                    if ($matrix[$i][$j] != null) {
+                        $matrix[$j][$i] = 1 / $matrix[$i][$j];
+                    } else {
+                        $matrix[$i][$j] = 1 / $matrix[$j][$i];
+                    }
+                }
+                //echo $matrix[$i][$j]." ";
+            }
+            //echo "\n";
+        }
+        // $criteria_name;
+        $this->rawSubCriteria[$criteria_name] = $matrix;
+        $this->subCriteriaPairWise[$criteria_name] = $this->normalizeRelativeInterestMatrixAndCountEigen($matrix);
+        $this->subCriteriaPairWise[$criteria_name]['sub'] = $this->setSub($criteria_name);
+        $do = $this->setSubPrioritiVektor($matrix, $this->subCriteriaPairWise[$criteria_name]['eigen']);
+        $this->subCriteriaPairWise[$criteria_name]['cr'] = $this->subconcistencyCheck($do, $this->subCriteriaPairWise[$criteria_name]['eigen']);
+        return $this;
+    }
+
+    public function setSub($criteria_name)
+    {
+        $set = [];
+        foreach ($this->dataSub as $key => $value) {
+            if ($criteria_name == $value['kriteria']) {
+                foreach ($value['subkriteria'] as $key1 => $value1) {
+                    array_push($set, $value1);
+                }
+            }
+        }
+        return $set;
+    }
+
+    public function setSubPrioritiVektor($matrix, $eigen)
+    {
+        for ($i = 0; $i < count($matrix); $i++) {
+            for ($j = 0; $j < count($matrix); $j++) {
+                $matrix[$j][$i] = $eigen[$i] * $matrix[$j][$i];
+            }
+        }
+        return $matrix;
     }
 
     public function normalizeRelativeInterestMatrixAndCountEigen($matrix)
@@ -349,10 +462,9 @@ class Ahp
     public function concistencyCheck($matrix, $eigen)
     {
         $a = count($matrix);
-        if(count($matrix)<=2)
+        if (count($matrix) <= 2) {
             return 0;
-        
-        else{
+        } else {
             $s = count($matrix);
             $dmax = 0;
             for ($i = 0; $i < $s; $i++) {
@@ -361,12 +473,49 @@ class Ahp
                     //if(!isset($tot[$j])){
                     //$tot[$j] = 0;
                     //}
+                    $test = $matrix[$j][$i];
                     $e += $matrix[$j][$i];
                 }
                 $dmax += $e * $eigen[$i];
 
             }
             $ci = ($dmax - $s) / ($s - 1);
+
+            $cr = $ci / $this->getIR($s);
+            return $cr;
+        }
+    }
+    public function subconcistencyCheck($matrix, $eigen)
+    {
+        $a = count($matrix);
+        if (count($matrix) <= 2) {
+            return 0;
+        } else {
+            $s = count($matrix);
+            $dmax = 0;
+            $dmax = 0;
+            for ($i = 0; $i < $s; $i++) {
+                for ($j = 0; $j < $s; $j++) {
+                    if ($i === $j) {
+                        $nilai = array_sum($matrix[$i]);
+                        $row = $eigen[$i];
+                        $dmax += $nilai / $row;
+                    }
+                }
+            }
+            // for ($i = 0; $i < $s; $i++) {
+            //     $e = 0;
+            //     for ($j = 0; $j < $s; $j++) {
+            //         //if(!isset($tot[$j])){
+            //         //$tot[$j] = 0;
+            //         //}
+            //         $test = $matrix[$j][$i];
+            //         $e += $matrix[$j][$i];
+            //     }
+            //     $dmax += $e * $eigen[$i];
+
+            // }
+            $ci = (($dmax / $s) - $s) / ($s - 1);
 
             $cr = $ci / $this->getIR($s);
             return $cr;

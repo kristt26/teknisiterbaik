@@ -127,6 +127,9 @@
                                 <li class="active">
                                     <a href="<?php echo site_url('kriterium/bobot'); ?>"><i class="fa fa-plus"></i> Bobot Kriteria</a>
                                 </li>
+                                <li class="active">
+                                    <a href="<?php echo site_url('subkriteria/index'); ?>"><i class="fa fa-plus"></i> Sub Kriteria</a>
+                                </li>
 							</ul>
                         </li>
                         <li>
@@ -144,14 +147,14 @@
                         </li>
                         <li>
                             <a href="#">
-                                <i class="fa fa-desktop"></i> <span>Karyawan</span>
+                                <i class="fa fa-desktop"></i> <span>Nasabah</span>
                             </a>
                             <ul class="treeview-menu">
 								<li class="active">
-                                    <a href="<?php echo site_url('karyawan/add'); ?>"><i class="fa fa-plus"></i> Add</a>
+                                    <a href="<?php echo site_url('nasabah/add'); ?>"><i class="fa fa-plus"></i> Add</a>
                                 </li>
 								<li>
-                                    <a href="<?php echo site_url('karyawan/index'); ?>"><i class="fa fa-list-ul"></i> Listing</a>
+                                    <a href="<?php echo site_url('nasabah/index'); ?>"><i class="fa fa-list-ul"></i> Listing</a>
                                 </li>
                                 <li>
                                     <a href="<?php echo site_url('analisa/index'); ?>">

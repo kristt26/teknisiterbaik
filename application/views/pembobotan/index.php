@@ -1,6 +1,6 @@
 <div class="row" ng-app="app" ng-controller="AnalisaController">
     <div class="col-md-12">
-        <div class="box" ng-show="view=='karyawan'">
+        <div class="box" ng-show="view=='nasabah'">
             <div class="box-header">
                 <h3 class="box-title">Alternatif</h3>
                 <!-- <div class="box-tools">
@@ -14,7 +14,7 @@
                             <th>#</th>
                             <th>nama</th>
                         </tr>
-                        <tr ng-repeat="item in karyawans">
+                        <tr ng-repeat="item in nasabahs">
                             <td>
                                 <div class="animated-checkbox">
                                     <label>
@@ -26,10 +26,61 @@
                             <td>{{item.nama}}</td>
                         </tr>
                     </table>
-                    <button ng-if="bobot" class="btn btn-info pull-right" ng-click="next()">Next</button>
+                    <button class="btn btn-info pull-right" ng-click="next()">Next</button>
                 </div>
 
             </div>
+        </div>
+        <div ng-show="view=='setnilai'">
+            <div class="box">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Nasabah</th>
+                            <th ng-repeat="itemkriteria in kriteria">{{itemkriteria.kriteria}}</th>
+                        </tr>
+                        <tr ng-repeat="item in alternatif">
+                            <td>
+
+                            </td>
+                            <td>{{item.nama}}</td>
+                            <td ng-repeat="setnilai in item.sub">
+                                <select class="form-control" ng-options="value as value.subkriteria for value in setnilai.nilai" ng-model="item.value[$index]" required="required">
+                                    <option value=""></option>
+                                </select>
+
+                            </td>
+                        </tr>
+                    </table>
+                    <button class="btn btn-info pull-right" ng-click="next()">Next</button>
+                </div>
+            </div>
+        </div>
+        <div ng-if="view=='matriks'">
+            <div class="box">
+                    <table class="table table-hover">
+                        <tr>
+                            <th>#</th>
+                            <th>Nama Nasabah</th>
+                            <th ng-repeat="itemkriteria in kriteria">{{itemkriteria.kriteria}}</th>
+                            <th>Total</th>
+                        </tr>
+                        <tr ng-repeat="item in alternatif">
+                            <td>
+
+                            </td>
+                            <td>{{item.nama}}</td>
+                            <td ng-repeat="setnilai in item.value">
+                                {{setnilai.hasil}}
+                            </td>
+                            <td>{{sumTotal(item.value)}}</td>
+                        </tr>
+                    </table>
+                    <button ng-if="view=='matriks'" class="btn btn-info" ng-click="back()">Kembali</button>
+                    <button class="btn btn-info pull-right" ng-click="next()">Next</button>
+                    <button ng-if="view=='matriks' && !bobot" class="btn btn-primary" ng-click="simpan()">Simpan</button>
+                </div>
         </div>
         <div ng-show="view=='hasil'">
             <div class="col-md-6">

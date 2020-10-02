@@ -11,7 +11,7 @@ class Analisa extends CI_Controller
         parent::__construct();
         $this->load->model('Pembobotan_model');
         $this->load->model('Bobotkriterium_model');
-        $this->load->model('Karyawan_model');
+        $this->load->model('Nasabah_model');
         $this->load->model('Kriterium_model');
         $this->load->model('Periode_model');
         $this->load->library('ahp');
@@ -35,7 +35,7 @@ class Analisa extends CI_Controller
     {
         if (isset($_POST) && count($_POST) > 0) {
             $params = array(
-                'idkaryawan' => $this->input->post('idkaryawan'),
+                'idnasabah' => $this->input->post('idnasabah'),
                 'idperiode' => $this->input->post('idperiode'),
             );
 
@@ -47,16 +47,16 @@ class Analisa extends CI_Controller
         }
     }
 
-    function addnilai()
+    public function addnilai()
     {
         $params = json_decode($this->security->xss_clean($this->input->raw_input_stream), true);
         $result = $this->Kriterium_model->add_nilai($params);
         echo json_encode(['message' => $result]);
     }
 
-    public function getkaryawan()
+    public function getnasabah()
     {
-        $data['karyawan'] = $this->Karyawan_model->get_all_karyawan();
+        $data['nasabah'] = $this->Nasabah_model->get_all_nasabah();
         $data['kriteria'] = $this->Kriterium_model->get_all_kriteria();
         $data['bobot'] = $this->Kriterium_model->get_nilai();
         $data['alternatif'] = $this->Kriterium_model->getalternatif();
@@ -66,7 +66,7 @@ class Analisa extends CI_Controller
 
     public function getLaporan($idperiode = null)
     {
-        $data['karyawan'] = $this->Karyawan_model->get_all_karyawan();
+        $data['nasabah'] = $this->Nasabah_model->get_all_nasabah();
         $data['kriteria'] = $this->Kriterium_model->get_all_kriteria();
         $data['bobot'] = $this->Kriterium_model->get_nilai($idperiode);
         $data['alternatif'] = $this->Kriterium_model->getalternatif($idperiode);
@@ -81,7 +81,7 @@ class Analisa extends CI_Controller
         if (isset($data['pembobotan']['idpembobotan'])) {
             if (isset($_POST) && count($_POST) > 0) {
                 $params = array(
-                    'idkaryawan' => $this->input->post('idkaryawan'),
+                    'idnasabah' => $this->input->post('idnasabah'),
                     'idperiode' => $this->input->post('idperiode'),
                 );
 

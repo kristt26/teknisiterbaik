@@ -106,8 +106,8 @@ class Kriterium_model extends CI_Model
             foreach ($value['item'] as $key1 => $value1) {
                 $a = $value1;
                 $item = [
-                    'idkaryawan'=>$value1['alternatif']['idkaryawan'],
-                    'idkaryawan1'=>$value1['alternatif1']['idkaryawan'],
+                    'idnasabah'=>$value1['alternatif']['idnasabah'],
+                    'idnasabah1'=>$value1['alternatif1']['idnasabah'],
                     'idperiode'=>$periode['idperiode'],
                     'bobot'=>$value1['nilai'],
                     'idkriteria'=>$value['idkriteria']
@@ -118,9 +118,9 @@ class Kriterium_model extends CI_Model
         foreach ($params['alternatif'] as $key => $value) {
             $item = [
                 'idperiode'=>$periode['idperiode'],
-                'idkaryawan'=>$value['idkaryawan'],
+                'idnasabah'=>$value['idnasabah'],
             ];
-            $this->db->insert('detailkaryawan', $item);
+            $this->db->insert('detailnasabah', $item);
         }
         if($this->db->trans_status()){
             $this->db->trans_commit();
@@ -148,19 +148,19 @@ class Kriterium_model extends CI_Model
         if($idperiode == null){
             $periode = $this->Periode_model->get_periodeaktif()['idperiode'];
             return $this->db->query("SELECT
-                `karyawan`.*
+                `nasabah`.*
             FROM
-                `detailkaryawan`
-                LEFT JOIN `karyawan` ON
-                `karyawan`.`idkaryawan` = `detailkaryawan`.`idkaryawan` WHERE idperiode='$periode'")->result();
+                `detailnasabah`
+                LEFT JOIN `nasabah` ON
+                `nasabah`.`idnasabah` = `detailnasabah`.`idnasabah` WHERE idperiode='$periode'")->result();
         }else{
             $periode = $this->Periode_model->get_periode($idperiode)['idperiode'];
             return $this->db->query("SELECT
-                `karyawan`.*
+                `nasabah`.*
             FROM
-                `detailkaryawan`
-                LEFT JOIN `karyawan` ON
-                `karyawan`.`idkaryawan` = `detailkaryawan`.`idkaryawan` WHERE idperiode='$periode'")->result();
+                `detailnasabah`
+                LEFT JOIN `nasabah` ON
+                `nasabah`.`idnasabah` = `detailnasabah`.`idnasabah` WHERE idperiode='$periode'")->result();
         }
         
     }
